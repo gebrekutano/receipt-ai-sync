@@ -28,10 +28,20 @@ import {
   TrendingUp,
   Award,
   Search,
-  Lock
+  Lock,
+  Plus,
+  Trash2,
+  Edit2,
+  Phone,
+  Mail,
+  Wallet,
+  Building2,
+  Loader2,
+  User as UserIcon
 } from 'lucide-react';
+import { toast } from 'sonner';
 import { formatCurrency, cn, translations } from '../../lib/utils';
-import { Transaction, Discrepancy, Language } from '../../types';
+import { Transaction, Discrepancy, Language, Waiter } from '../../types';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const mockTransactions: Transaction[] = [
@@ -59,7 +69,7 @@ const revenueData = [
 
 const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
 
-type AdminTab = 'overview' | 'fraud' | 'analytics' | 'alerts';
+type AdminTab = 'overview' | 'fraud' | 'analytics' | 'alerts' | 'staff';
 
 interface AdminPanelProps {
   lang: Language;
@@ -67,7 +77,39 @@ interface AdminPanelProps {
 
 export const AdminPanel: React.FC<AdminPanelProps> = ({ lang }) => {
   const [activeTab, setActiveTab] = useState<AdminTab>('overview');
+  const [staff, setStaff] = useState<Waiter[]>([
+    { 
+      id: 'w1', 
+      name: 'Abebe Birhanu', 
+      username: 'abebe_waiter', 
+      phone: '+251911223344', 
+      totalSales: 45000, 
+      tipsCollected: 3500, 
+      activeShift: true,
+      startingBalance: 500,
+      tipDisbursementAccount: 'Telebirr 0911223344',
+      createdAt: '2024-01-15'
+    },
+    { 
+      id: 'w2', 
+      name: 'Selam Tesfaye', 
+      username: 'selam_waiter', 
+      phone: '+251922334455', 
+      totalSales: 38000, 
+      tipsCollected: 2800, 
+      activeShift: false,
+      startingBalance: 300,
+      tipDisbursementAccount: 'CBE Birr 0922334455',
+      createdAt: '2024-02-01'
+    }
+  ]);
+  const [isAddingStaff, setIsAddingStaff] = useState(false);
   const t = translations[lang];
+
+  const removeStaff = (id: string) => {
+    setStaff(staff.filter(s => s.id !== id));
+    toast.success('Staff member removed successfully');
+  };
 
   return (
     <div className="p-4 md:p-8 max-w-[1600px] mx-auto space-y-8 animate-in fade-in duration-500 pb-20">
@@ -93,6 +135,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ lang }) => {
         <TabButton active={activeTab === 'fraud'} onClick={() => setActiveTab('fraud')} label="Fraud Shield" icon={<Lock size={18} />} />
         <TabButton active={activeTab === 'alerts'} onClick={() => setActiveTab('alerts')} label="Discrepancies" icon={<ShieldAlert size={18} />} badge="3" />
         <TabButton active={activeTab === 'analytics'} onClick={() => setActiveTab('analytics')} label="Performance" icon={<Award size={18} />} />
+        <TabButton active={activeTab === 'staff'} onClick={() => setActiveTab('staff')} label="Staff Management" icon={<Users size={18} />} />
       </div>
 
       <AnimatePresence mode="wait">
@@ -382,11 +425,157 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ lang }) => {
                 </div>
              </div>
           )}
+
+          {activeTab === 'staff' && (
+            <div className="space-y-6">
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                  <h2 className="text-3xl font-black text-slate-900">Waiters Management</h2>
+                  <p className="text-slate-500 font-medium">Manage your sales staff, balances, and tip accounts.</p>
+                </div>
+                <button 
+                  onClick={() => setIsAddingStaff(true)}
+                  className="flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-2xl font-black hover:bg-blue-700 transition-all shadow-xl shadow-blue-500/20"
+                >
+                  <Plus size={20} /> Add New Waiter
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {staff.map((waiter) => (
+                  <div key={waiter.id} className="bg-white rounded-[2.5rem] border border-slate-100 p-8 shadow-sm hover:shadow-xl transition-all relative group">
+                    <div className="flex justify-between items-start">
+                      <div className="flex gap-4">
+                        <div className="w-16 h-16 bg-slate-100 rounded-3xl flex items-center justify-center text-2xl font-black text-slate-400 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                          {waiter.name[0]}
+                        </div>
+                        <div>
+                          <h4 className="text-xl font-black text-slate-900">{waiter.name}</h4>
+                          <p className="text-slate-400 font-bold text-sm uppercase tracking-widest">@{waiter.username}</p>
+                          <div className="flex items-center gap-4 mt-2">
+                             <span className="flex items-center gap-1 text-xs font-bold text-slate-500">
+                                <Phone size={14} className="text-blue-500" /> {waiter.phone}
+                             </span>
+                             <span className="flex items-center gap-1 text-xs font-bold text-slate-500">
+                                <Calendar size={14} className="text-blue-500" /> Since {waiter.createdAt}
+                             </span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <button className="p-3 bg-slate-50 text-slate-400 rounded-xl hover:bg-blue-50 hover:text-blue-600 transition-colors"><Edit2 size={16} /></button>
+                        <button 
+                          onClick={() => removeStaff(waiter.id)}
+                          className="p-3 bg-slate-50 text-slate-400 rounded-xl hover:bg-rose-50 hover:text-rose-600 transition-colors"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-4 mt-8">
+                      <div className="p-4 bg-slate-50 rounded-2xl">
+                        <p className="text-[9px] font-black text-slate-400 uppercase">Total Sales</p>
+                        <p className="text-lg font-black text-slate-900 mt-1">{formatCurrency(waiter.totalSales, lang)}</p>
+                      </div>
+                      <div className="p-4 bg-slate-50 rounded-2xl">
+                        <p className="text-[9px] font-black text-slate-400 uppercase">Tips Collected</p>
+                        <p className="text-lg font-black text-emerald-600 mt-1">{formatCurrency(waiter.tipsCollected, lang)}</p>
+                      </div>
+                      <div className="p-4 bg-slate-50 rounded-2xl">
+                        <p className="text-[9px] font-black text-slate-400 uppercase">Start Balance</p>
+                        <p className="text-lg font-black text-blue-600 mt-1">{formatCurrency(waiter.startingBalance, lang)}</p>
+                      </div>
+                    </div>
+
+                    <div className="mt-6 p-4 border border-slate-100 rounded-2xl flex items-center justify-between">
+                       <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center">
+                             <CreditCard size={20} />
+                          </div>
+                          <div>
+                             <p className="text-[9px] font-black text-slate-400 uppercase">Disbursement Account</p>
+                             <p className="text-sm font-bold text-slate-900">{waiter.tipDisbursementAccount}</p>
+                          </div>
+                       </div>
+                       <span className={cn(
+                          "px-3 py-1 rounded-full text-[10px] font-black",
+                          waiter.activeShift ? "bg-emerald-50 text-emerald-600" : "bg-slate-100 text-slate-400"
+                       )}>
+                          {waiter.activeShift ? 'ON SHIFT' : 'OFF DUTY'}
+                       </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Add Staff Modal Overlay */}
+              <AnimatePresence>
+                {isAddingStaff && (
+                  <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                    <motion.div 
+                      initial={{ opacity: 0 }} 
+                      animate={{ opacity: 1 }} 
+                      exit={{ opacity: 0 }}
+                      onClick={() => setIsAddingStaff(false)}
+                      className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" 
+                    />
+                    <motion.div 
+                      initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                      animate={{ scale: 1, opacity: 1, y: 0 }}
+                      exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                      className="bg-white rounded-[3rem] p-10 w-full max-w-2xl relative z-10 shadow-2xl"
+                    >
+                      <div className="flex justify-between items-center mb-8">
+                        <div>
+                          <h3 className="text-3xl font-black text-slate-900">Add New Staff</h3>
+                          <p className="text-slate-500 font-medium">Create a new waiter account under your tenant.</p>
+                        </div>
+                        <button 
+                          onClick={() => setIsAddingStaff(false)}
+                          className="w-12 h-12 flex items-center justify-center bg-slate-50 rounded-2xl text-slate-400 hover:text-slate-900"
+                        >
+                          <Lock size={20} />
+                        </button>
+                      </div>
+
+                      <form className="grid grid-cols-1 md:grid-cols-2 gap-6" onSubmit={(e) => {
+                        e.preventDefault();
+                        toast.success('New waiter added successfully!');
+                        setIsAddingStaff(false);
+                      }}>
+                        <InputField label="Full Name" placeholder="e.g. John Doe" icon={<UserIcon size={18} />} />
+                        <InputField label="Username" placeholder="e.g. john_waiter" icon={<AtSign size={18} />} />
+                        <InputField label="Phone Number" placeholder="+251..." icon={<Phone size={18} />} />
+                        <InputField label="Email (Optional)" placeholder="john@example.com" icon={<Mail size={18} />} />
+                        <InputField label="Starting Balance" placeholder="500" type="number" icon={<Wallet size={18} />} />
+                        <InputField label="Tip Disbursement Account" placeholder="Telebirr / Account No" icon={<CreditCard size={18} />} />
+                        
+                        <div className="md:col-span-2 pt-6">
+                          <button 
+                            type="submit"
+                            className="w-full py-4 bg-slate-900 text-white rounded-[1.5rem] font-black shadow-xl hover:bg-black transition-all active:scale-95"
+                          >
+                            Register Employee
+                          </button>
+                        </div>
+                      </form>
+                    </motion.div>
+                  </div>
+                )}
+              </AnimatePresence>
+            </div>
+          )}
         </motion.div>
       </AnimatePresence>
     </div>
   );
 };
+
+// Added some missing lucide icons
+const AtSign = ({ size, className }: { size?: number, className?: string }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="4"/><path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-4 8"/></svg>
+);
 
 interface TabButtonProps {
   active: boolean;
@@ -460,4 +649,25 @@ const FraudAlert: React.FC<FraudAlertProps> = ({ type, count, severity }) => (
          <ShieldAlert size={20} />
       </div>
    </div>
+);
+
+interface InputFieldProps {
+  label: string;
+  placeholder: string;
+  icon: React.ReactNode;
+  type?: string;
+}
+
+const InputField: React.FC<InputFieldProps> = ({ label, placeholder, icon, type = 'text' }) => (
+  <div className="space-y-2">
+    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">{label}</label>
+    <div className="relative">
+      <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">{icon}</div>
+      <input 
+        type={type} 
+        placeholder={placeholder} 
+        className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-4 pl-12 pr-4 text-sm font-bold focus:bg-white focus:border-blue-600 focus:ring-4 focus:ring-blue-600/5 transition-all outline-none"
+      />
+    </div>
+  </div>
 );

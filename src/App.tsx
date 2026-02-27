@@ -8,15 +8,18 @@ import {
   ChevronRight, 
   Menu, 
   X, 
-  Globe
+  Globe,
+  LogOut
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AdminPanel } from './features/admin/AdminPanel';
 import { WaiterApp } from './features/waiter/WaiterApp';
+import { AuthFlow } from './features/auth/AuthFlow';
 import { cn, translations } from './lib/utils';
-import { Language } from './types';
+import { Language, BusinessOwner } from './types';
 
 function App() {
+  const [user, setUser] = useState<BusinessOwner | null>(null);
   const [activeTab, setActiveTab] = useState<'admin' | 'waiter'>('admin');
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [lang, setLang] = useState<Language>('en');
@@ -36,6 +39,15 @@ function App() {
     };
   }, []);
 
+  if (!user) {
+    return (
+      <>
+        <Toaster position="top-center" expand={true} richColors />
+        <AuthFlow onSuccess={(userData) => setUser(userData)} />
+      </>
+    );
+  }
+
   return (
     <div className="flex h-screen bg-slate-50 overflow-hidden font-sans">
       <Toaster position="top-center" expand={true} richColors />
@@ -52,7 +64,7 @@ function App() {
           {sidebarOpen && (
             <div className="flex flex-col text-white">
               <span className="text-xl font-black tracking-tight leading-none">EthioSync</span>
-              <span className="text-[10px] text-blue-400 font-bold uppercase tracking-widest mt-1">B2B Payments</span>
+              <span className="text-[10px] text-blue-400 font-bold uppercase tracking-widest mt-1">{user.businessName}</span>
             </div>
           )}
         </div>
@@ -95,9 +107,10 @@ function App() {
           </div>
 
           <NavItem 
-            icon={<UserCircle size={22} />} 
-            label={t.profile} 
+            icon={<LogOut size={22} />} 
+            label="Logout" 
             collapsed={!sidebarOpen}
+            onClick={() => setUser(null)}
           />
         </div>
         
@@ -115,7 +128,7 @@ function App() {
         <header className="md:hidden flex items-center justify-between p-4 bg-white border-b border-slate-100 shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 bg-blue-600 rounded-lg flex items-center justify-center text-white font-black">E</div>
-            <span className="font-black text-slate-900 tracking-tight text-lg">EthioSync</span>
+            <span className="font-black text-slate-900 tracking-tight text-lg truncate max-w-[150px]">{user.businessName}</span>
           </div>
           <div className="flex items-center gap-3">
             <button 
@@ -165,6 +178,7 @@ function App() {
                     <div className={cn("w-2.5 h-2.5 rounded-full", isOnline ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" : "bg-rose-500")} />
                     <span className="text-slate-400 font-black uppercase tracking-widest text-xs">{isOnline ? 'Online Status: active' : 'Network Disconnected'}</span>
                   </div>
+                  <button onClick={() => setUser(null)} className="w-full py-4 bg-rose-500 text-white rounded-2xl font-bold active:scale-95 transition-transform">Logout</button>
                   <button onClick={() => setIsMobileMenuOpen(false)} className="w-full py-4 bg-slate-800 text-white rounded-2xl font-bold active:scale-95 transition-transform">Close Menu</button>
                 </div>
               </motion.div>

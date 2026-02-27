@@ -17,9 +17,32 @@ export interface Transaction {
 export interface Waiter {
   id: string;
   name: string;
+  username: string;
+  email?: string;
+  phone: string;
   totalSales: number;
   tipsCollected: number;
   activeShift: boolean;
+  startingBalance: number;
+  tipDisbursementAccount: string;
+  createdAt: string;
+}
+
+export interface BusinessOwner {
+  id: string;
+  businessName: string;
+  username: string;
+  email?: string;
+  phone: string;
+  tinNumber?: string;
+}
+
+export interface SignupData {
+  businessName: string;
+  username: string;
+  email?: string;
+  phone: string;
+  tinNumber?: string;
 }
 
 export interface DailyStats {
